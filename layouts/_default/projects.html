@@ -1,0 +1,169 @@
+{{ define "title" }}
+  {{ .Title }} · {{ .Site.Title }}
+{{ end }}
+{{ define "content" }}
+<section class="container page">
+  <article>
+    <header>
+      <h1 class="title">
+        <a class="title-link" href="{{ .Permalink | safeURL }}">
+          {{ .Title }}
+        </a>
+      </h1>
+    </header>
+
+    {{ .Content }}
+
+    {{ if .Params.projects }}
+    <div class="projects-list">
+      {{ range $projectIndex, $project := .Params.projects }}
+      <div class="project-item" data-project-index="{{ $projectIndex }}">
+        <h2 class="project-title">
+          <a href="{{ $project.link }}" target="_blank" rel="noopener noreferrer">{{ $project.title }}</a>
+        </h2>
+
+        <p class="project-description">{{ $project.description }}</p>
+
+        {{ if $project.screenshots }}
+        <div class="project-screenshots">
+          {{ range $screenshotIndex, $screenshot := $project.screenshots }}
+          <img
+            src="{{ $screenshot }}"
+            alt="Project screenshot"
+            loading="lazy"
+            class="screenshot-thumbnail"
+            data-project-index="{{ $projectIndex }}"
+            data-screenshot-index="{{ $screenshotIndex }}"
+            data-screenshot="{{ $screenshot }}"
+          />
+          {{ end }}
+        </div>
+        {{ end }}
+
+        {{ if $project.tags }}
+        <div class="project-tags">
+          {{ range $project.tags }}
+          <span class="tag">{{ . }}</span>
+          {{ end }}
+        </div>
+        {{ end }}
+
+        <a href="{{ $project.link }}" class="project-link" target="_blank" rel="noopener noreferrer">
+          View Project →
+        </a>
+      </div>
+      {{ end }}
+    </div>
+    {{ end }}
+  </article>
+
+  <!-- Modal for screenshot preview -->
+  <div id="screenshot-modal" class="screenshot-modal">
+    <span class="modal-close">&times;</span>
+    <div class="modal-content">
+      <img id="modal-image" src="" alt="Screenshot preview">
+      <button class="modal-nav modal-prev" aria-label="Previous screenshot">&lsaquo;</button>
+      <button class="modal-nav modal-next" aria-label="Next screenshot">&rsaquo;</button>
+    </div>
+  </div>
+</section>
+
+<script>
+(function() {
+  const modal = document.getElementById('screenshot-modal');
+  const modalImage = document.getElementById('modal-image');
+  const closeBtn = document.querySelector('.modal-close');
+  const prevBtn = document.querySelector('.modal-prev');
+  const nextBtn = document.querySelector('.modal-next');
+  const thumbnails = document.querySelectorAll('.screenshot-thumbnail');
+
+  let currentProjectIndex = 0;
+  let currentScreenshotIndex = 0;
+  let projectScreenshots = [];
+
+  function getProjectScreenshots(projectIndex) {
+    const screenshots = [];
+    thumbnails.forEach(thumb => {
+      if (parseInt(thumb.dataset.projectIndex) === projectIndex) {
+        screenshots.push({
+          src: thumb.dataset.screenshot,
+          index: parseInt(thumb.dataset.screenshotIndex)
+        });
+      }
+    });
+    return screenshots.sort((a, b) => a.index - b.index);
+  }
+
+  function showScreenshot(projectIndex, screenshotIndex) {
+    projectScreenshots = getProjectScreenshots(projectIndex);
+    currentProjectIndex = projectIndex;
+    currentScreenshotIndex = screenshotIndex;
+
+    if (projectScreenshots.length > 0) {
+      modalImage.src = projectScreenshots[currentScreenshotIndex].src;
+      modal.classList.add('active');
+      document.body.style.overflow = 'hidden';
+
+      // Show/hide navigation buttons
+      prevBtn.style.display = projectScreenshots.length > 1 ? 'block' : 'none';
+      nextBtn.style.display = projectScreenshots.length > 1 ? 'block' : 'none';
+    }
+  }
+
+  function closeModal() {
+    modal.classList.remove('active');
+    document.body.style.overflow = '';
+  }
+
+  function navigateScreenshot(direction) {
+    currentScreenshotIndex += direction;
+    if (currentScreenshotIndex < 0) {
+      currentScreenshotIndex = projectScreenshots.length - 1;
+    } else if (currentScreenshotIndex >= projectScreenshots.length) {
+      currentScreenshotIndex = 0;
+    }
+    modalImage.src = projectScreenshots[currentScreenshotIndex].src;
+  }
+
+  // Event listeners
+  thumbnails.forEach(thumb => {
+    thumb.addEventListener('click', function() {
+      const projectIndex = parseInt(this.dataset.projectIndex);
+      const screenshotIndex = parseInt(this.dataset.screenshotIndex);
+      showScreenshot(projectIndex, screenshotIndex);
+    });
+  });
+
+  closeBtn.addEventListener('click', closeModal);
+
+  modal.addEventListener('click', function(e) {
+    if (e.target === modal) {
+      closeModal();
+    }
+  });
+
+  prevBtn.addEventListener('click', function(e) {
+    e.stopPropagation();
+    navigateScreenshot(-1);
+  });
+
+  nextBtn.addEventListener('click', function(e) {
+    e.stopPropagation();
+    navigateScreenshot(1);
+  });
+
+  // Keyboard navigation
+  document.addEventListener('keydown', function(e) {
+    if (!modal.classList.contains('active')) return;
+
+    if (e.key === 'Escape') {
+      closeModal();
+    } else if (e.key === 'ArrowLeft') {
+      navigateScreenshot(-1);
+    } else if (e.key === 'ArrowRight') {
+      navigateScreenshot(1);
+    }
+  });
+})();
+</script>
+{{ end }}

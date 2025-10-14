@@ -1,0 +1,52 @@
+baseURL = 'https://lalitmishra.in/'
+languageCode = 'en-us'
+title = 'Lalit Mishra'
+theme = 'hugo-coder'
+
+[params]
+  author = 'Lalit Mishra'
+  description = 'Developer | Engineer | Builder'
+  keywords = 'portfolio,developer,personal'
+  info = ['Developer', 'Engineer', 'Builder']
+  avatarURL = 'images/avatar.webp'
+  dateFormat = 'January 2, 2006'
+
+  colorScheme = 'auto'
+  hideColorSchemeToggle = false
+
+  customCSS = []
+  customSCSS = ['scss/custom.scss']
+  customJS = []
+
+[menu]
+  [[menu.main]]
+    name = 'Projects'
+    weight = 1
+    url = 'projects/'
+
+[[params.social]]
+  name = "Github"
+  icon = "fa-brands fa-github fa-2x"
+  weight = 1
+  url = "https://github.com/5inGularity/"
+
+[[params.social]]
+  name = "LinkedIn"
+  icon = "fa-brands fa-linkedin fa-2x"
+  weight = 2
+  url = "https://www.linkedin.com/in/lalit-mishra-a588321b/"
+
+[[params.social]]
+  name = "Email"
+  icon = "fa-solid fa-envelope fa-2x"
+  weight = 3
+  url = "mailto:gamewithlalit@gmail.com"
+
+[languages.en]
+  languageName = 'English'
+
+[markup.highlight]
+  style = 'github-dark'
+
+[markup.goldmark.renderer]
+  unsafe = true
