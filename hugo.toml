@@ -40,7 +40,7 @@ theme = 'hugo-coder'
   name = "Email"
   icon = "fa-solid fa-envelope fa-2x"
   weight = 3
-  url = "mailto:gamewithlalit@gmail.com"
+  url = "mailto:mail@lalitmishra.in"
 
 [languages.en]
   languageName = 'English'
