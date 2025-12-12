@@ -42,6 +42,12 @@ theme = 'hugo-coder'
   weight = 3
   url = "mailto:mail@lalitmishra.in"
 
+[[params.social]]
+  name = "X"
+  icon = "fa-brands fa-x-twitter fa-2x"
+  weight = 4
+  url = "https://x.com/5inGularity"
+
 [languages.en]
   languageName = 'English'
 
