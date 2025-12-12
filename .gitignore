@@ -21,3 +21,6 @@ npm-debug.log*
 
 # Build lock
 .hugo_build.lock
+
+
+.playwright-mcp/*

@@ -27,6 +27,28 @@
         {{ if $project.screenshots }}
         <div class="project-screenshots">
           {{ range $screenshotIndex, $screenshot := $project.screenshots }}
+          {{ if or (in $screenshot "youtube.com") (in $screenshot "youtu.be") }}
+          {{ $videoId := "" }}
+          {{ if in $screenshot "watch?v=" }}
+            {{ $videoId = index (split (index (split $screenshot "watch?v=") 1) "&") 0 }}
+          {{ else if in $screenshot "youtu.be/" }}
+            {{ $videoId = index (split $screenshot "youtu.be/") 1 }}
+          {{ end }}
+          <div class="screenshot-thumbnail video-thumbnail"
+            data-project-index="{{ $projectIndex }}"
+            data-screenshot-index="{{ $screenshotIndex }}"
+            data-screenshot="{{ $screenshot }}"
+            data-video-id="{{ $videoId }}">
+            <iframe
+              src="https://www.youtube.com/embed/{{ $videoId }}"
+              frameborder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowfullscreen
+              loading="lazy">
+            </iframe>
+            <div class="video-overlay">▶</div>
+          </div>
+          {{ else }}
           <img
             src="{{ $screenshot }}"
             alt="Project screenshot"
@@ -36,6 +58,7 @@
             data-screenshot-index="{{ $screenshotIndex }}"
             data-screenshot="{{ $screenshot }}"
           />
+          {{ end }}
           {{ end }}
         </div>
         {{ end }}
@@ -62,6 +85,7 @@
     <span class="modal-close">&times;</span>
     <div class="modal-content">
       <img id="modal-image" src="" alt="Screenshot preview">
+      <iframe id="modal-video" src="" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
       <button class="modal-nav modal-prev" aria-label="Previous screenshot">&lsaquo;</button>
       <button class="modal-nav modal-next" aria-label="Next screenshot">&rsaquo;</button>
     </div>
@@ -72,6 +96,7 @@
 (function() {
   const modal = document.getElementById('screenshot-modal');
   const modalImage = document.getElementById('modal-image');
+  const modalVideo = document.getElementById('modal-video');
   const closeBtn = document.querySelector('.modal-close');
   const prevBtn = document.querySelector('.modal-prev');
   const nextBtn = document.querySelector('.modal-next');
@@ -87,7 +112,9 @@
       if (parseInt(thumb.dataset.projectIndex) === projectIndex) {
         screenshots.push({
           src: thumb.dataset.screenshot,
-          index: parseInt(thumb.dataset.screenshotIndex)
+          videoId: thumb.dataset.videoId,
+          index: parseInt(thumb.dataset.screenshotIndex),
+          isVideo: !!thumb.dataset.videoId
         });
       }
     });
@@ -100,7 +127,18 @@
     currentScreenshotIndex = screenshotIndex;
 
     if (projectScreenshots.length > 0) {
-      modalImage.src = projectScreenshots[currentScreenshotIndex].src;
+      const current = projectScreenshots[currentScreenshotIndex];
+
+      if (current.isVideo) {
+        modalImage.style.display = 'none';
+        modalVideo.style.display = 'block';
+        modalVideo.src = 'https://www.youtube.com/embed/' + current.videoId + '?autoplay=1';
+      } else {
+        modalVideo.style.display = 'none';
+        modalImage.style.display = 'block';
+        modalImage.src = current.src;
+      }
+
       modal.classList.add('active');
       document.body.style.overflow = 'hidden';
 
@@ -113,6 +151,7 @@
   function closeModal() {
     modal.classList.remove('active');
     document.body.style.overflow = '';
+    modalVideo.src = ''; // Stop video playback
   }
 
   function navigateScreenshot(direction) {
@@ -122,7 +161,17 @@
     } else if (currentScreenshotIndex >= projectScreenshots.length) {
       currentScreenshotIndex = 0;
     }
-    modalImage.src = projectScreenshots[currentScreenshotIndex].src;
+
+    const current = projectScreenshots[currentScreenshotIndex];
+    if (current.isVideo) {
+      modalImage.style.display = 'none';
+      modalVideo.style.display = 'block';
+      modalVideo.src = 'https://www.youtube.com/embed/' + current.videoId + '?autoplay=1';
+    } else {
+      modalVideo.style.display = 'none';
+      modalImage.style.display = 'block';
+      modalImage.src = current.src;
+    }
   }
 
   // Event listeners
